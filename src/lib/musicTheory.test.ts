@@ -16,6 +16,12 @@ import {
   parseNoteAnswer,
   pitchClassNames,
 } from './musicTheory'
+import {
+  chooseChordNameForSpelling,
+  chooseChordRootForSpelling,
+  spellChordToneName,
+  spellChordToneWithOctave,
+} from './chordSpelling'
 import { createQuizQuestion, positionPitchClass, samePosition } from './quiz'
 import { chordPlaybackNotes } from './guitarAudio'
 import {
@@ -84,6 +90,28 @@ describe('fretboard quiz helpers', () => {
 })
 
 describe('chord shape helpers', () => {
+  it('chooses a single chord spelling for answer metadata', () => {
+    expect(chooseChordNameForSpelling('A#m / Bbm')).toBe('A#m')
+    expect(chooseChordNameForSpelling('B# / C')).toBe('C')
+    expect(chooseChordRootForSpelling('A#m / Bbm', 'Bb')).toBe('A#')
+  })
+
+  it('spells note names from their chord tone function', () => {
+    expect(spellChordToneName('C', 'b3', 3)).toBe('Eb')
+    expect(spellChordToneName('C', 'b7', 10)).toBe('Bb')
+    expect(spellChordToneWithOctave('C', 'R', 48)).toBe('C3')
+    expect(spellChordToneWithOctave('C', 'b3', 51)).toBe('Eb3')
+    expect(spellChordToneWithOctave('C', 'b7', 58)).toBe('Bb3')
+    expect(spellChordToneWithOctave('C', 'b3', 63)).toBe('Eb4')
+  })
+
+  it('keeps octaves correct for enharmonic chord spellings', () => {
+    expect(spellChordToneWithOctave('A#', 'b3', 49)).toBe('C#3')
+    expect(spellChordToneWithOctave('A#', '5', 53)).toBe('E#3')
+    expect(spellChordToneWithOctave('B#', 'R', 48)).toBe('B#2')
+    expect(spellChordToneWithOctave('Cb', 'R', 47)).toBe('Cb3')
+  })
+
   it('accepts practical aliases for whole-chord answers', () => {
     const aMinor = ALL_IMPORTED_CHORD_SHAPES.find((shape) => shape.root === 'A' && shape.suffix === 'minor')
     const cMajorSeven = ALL_IMPORTED_CHORD_SHAPES.find((shape) => shape.root === 'C' && shape.suffix === 'maj7')

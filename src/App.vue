@@ -25,7 +25,7 @@ import {
   type ScaleChordQuizQuestion,
   type ScaleDegreeFunction,
 } from './lib/scaleRomanQuiz'
-import { pitchClassNames } from './lib/musicTheory'
+import { chooseChordNameForSpelling, chooseChordRootForSpelling, spellChordToneWithOctave } from './lib/chordSpelling'
 import { playChordNotesOnce, playChordShape, stopChordPlayback } from './lib/guitarAudio'
 
 type PracticeMode = 'chord-shapes' | 'chord-recognition' | 'scale-functions'
@@ -119,9 +119,14 @@ const feedbackChordName = computed(() =>
     : question.value.shape.name,
 )
 const metadataChordName = computed(() =>
-  practiceMode.value === 'scale-functions'
-    ? activeShape.value.name
-    : feedbackChordName.value,
+  chooseChordNameForSpelling(
+    practiceMode.value === 'scale-functions'
+      ? activeShape.value.name
+      : feedbackChordName.value,
+  ),
+)
+const metadataChordRoot = computed(() =>
+  chooseChordRootForSpelling(metadataChordName.value, activeShape.value.root),
 )
 const chordToneSummary = computed(() =>
   playedPositionsLowToHigh.value
@@ -130,7 +135,7 @@ const chordToneSummary = computed(() =>
 )
 const actualNoteSummary = computed(() =>
   playedPositionsLowToHigh.value
-    .map((position) => noteNameWithOctave(position))
+    .map((position) => chordNoteNameWithOctave(position))
     .join('  '),
 )
 const playButtonLabel = computed(() => (playbackState.value === 'single-notes' ? 'Stop' : 'Play'))
@@ -366,19 +371,22 @@ function positionKey(position: FretboardPosition): string {
   return `${position.stringIndex}-${position.fret}`
 }
 
-function noteNameWithOctave(position: FretboardPosition): string {
-  const midi = positionMidi(position)
-  const octave = Math.floor(midi / 12) - 1
-
-  return `${pitchClassNames(midi % 12)}${octave}`
-}
-
 function expectedFunctionForPosition(position: FretboardPosition): FunctionAnswer {
   const pitchClass = positionPitchClass(position)
 
   return practiceMode.value === 'scale-functions'
     ? scaleDegreeFunction(scaleQuestion.value, pitchClass)
     : chordToneFunction(question.value.shape, pitchClass)
+}
+
+function chordNoteNameWithOctave(position: FretboardPosition): string {
+  const pitchClass = positionPitchClass(position)
+
+  return spellChordToneWithOctave(
+    metadataChordRoot.value,
+    chordToneFunction(activeShape.value, pitchClass),
+    positionMidi(position),
+  )
 }
 
 function markerClass(position: FretboardPosition): Record<string, boolean> {
