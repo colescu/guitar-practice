@@ -108,4 +108,18 @@ describe('practice app', () => {
 
     wrapper.unmount()
   })
+
+  it('shows feedback functions in the same order as answer metadata', async () => {
+    const wrapper = mount(App)
+
+    await getButton(wrapper, 'Chord Shapes').trigger('click')
+    await getButton(wrapper, 'Show answer').trigger('click')
+
+    const feedbackText = wrapper.find('.feedback').text()
+    const feedbackFunctions = feedbackText.match(/Functions: ([^.]+)\./)?.[1]
+
+    expect(feedbackFunctions).toBe(metadataValue(wrapper, 'Chord tones'))
+
+    wrapper.unmount()
+  })
 })

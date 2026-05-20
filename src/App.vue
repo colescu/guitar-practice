@@ -109,7 +109,7 @@ const answerLabel = computed(() => (practiceMode.value === 'scale-functions' ? '
 const answerPlaceholder = computed(() => (practiceMode.value === 'scale-functions' ? 'ii' : 'Am7'))
 const expectedFunctionLabel = computed(() => (practiceMode.value === 'scale-functions' ? 'Scale degrees' : 'Functions'))
 const expectedFunctionSummary = computed(() =>
-  playedPositions.value
+  playedPositionsLowToHigh.value
     .map((position) => expectedFunctionForPosition(position))
     .join('  '),
 )
