@@ -86,4 +86,26 @@ describe('practice app', () => {
 
     wrapper.unmount()
   })
+
+  it('hides answer feedback when retrying the same question', async () => {
+    const wrapper = mount(App)
+
+    await getButton(wrapper, 'Chord Only').trigger('click')
+    await wrapper.find('.answer-form input').setValue('H')
+    window.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter' }))
+    await nextTick()
+
+    expect(wrapper.find('.feedback').text()).toContain('Not quite')
+    expect(wrapper.find('.feedback').text()).not.toContain('This shape is')
+    expect(wrapper.find('.answer-metadata').exists()).toBe(false)
+
+    await getButton(wrapper, 'Retry').trigger('click')
+    await nextTick()
+
+    expect(wrapper.find('.feedback').exists()).toBe(false)
+    expect(wrapper.find('.answer-metadata').exists()).toBe(false)
+    expect((wrapper.find('.answer-form input').element as HTMLInputElement).value).toBe('H')
+
+    wrapper.unmount()
+  })
 })

@@ -198,7 +198,7 @@ function retryQuestion(): void {
 }
 
 function showAnswer(): void {
-  if (result.value) {
+  if (result.value?.revealed || result.value?.correct) {
     return
   }
 
@@ -650,6 +650,14 @@ function stringStyle(stringIndex: number): Record<string, string> {
           >
             Retry
           </button>
+          <button
+            v-if="!result.correct && !result.revealed"
+            type="button"
+            class="secondary-button"
+            @click="showAnswer"
+          >
+            Show answer
+          </button>
           <button type="button" @click="nextQuestion">Next</button>
         </template>
       </form>
@@ -738,7 +746,10 @@ function stringStyle(stringIndex: number): Record<string, string> {
         role="status"
       >
         <strong>{{ result.revealed ? 'Answer' : result.correct ? 'Correct' : 'Not quite' }}</strong>
-        <template v-if="practiceMode === 'scale-functions'">
+        <template v-if="!result.correct && !result.revealed">
+          Try again, reveal the answer, or skip to the next question.
+        </template>
+        <template v-else-if="practiceMode === 'scale-functions'">
           In {{ scaleQuestion.scaleName }}, this chord is {{ scaleQuestion.romanNumeral }}.
           {{ expectedFunctionLabel }}: {{ expectedFunctionSummary }}.
         </template>
@@ -750,7 +761,7 @@ function stringStyle(stringIndex: number): Record<string, string> {
         </template>
       </p>
 
-      <dl v-if="result" class="answer-metadata" aria-label="Answer details">
+      <dl v-if="result && (result.correct || result.revealed)" class="answer-metadata" aria-label="Answer details">
         <div>
           <dt>Chord</dt>
           <dd>{{ metadataChordName }}</dd>
